@@ -36,15 +36,14 @@ export async function GET(
 
   let embedUrl: string;
   switch (lesson.videoProvider) {
-    case "YOUTUBE":
-      embedUrl = `https://www.youtube-nocookie.com/embed/${lesson.videoRef}?rel=0&modestbranding=1`;
-      break;
     case "VIMEO":
       embedUrl = `https://player.vimeo.com/video/${lesson.videoRef}`;
       break;
     case "MP4":
       embedUrl = `/api/lessons/${lesson.id}/stream`;
       break;
+    default:
+      embedUrl = `https://www.youtube-nocookie.com/embed/${lesson.videoRef}?rel=0&modestbranding=1`;
   }
 
   return NextResponse.json({ provider: lesson.videoProvider, embedUrl });

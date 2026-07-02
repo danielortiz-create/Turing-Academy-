@@ -4,6 +4,8 @@ out/
 build/
 .env
 .env*.local
+prisma/dev.db
+prisma/dev.db-journal
 *.tsbuildinfo
 next-env.d.ts
 storage/videos/*

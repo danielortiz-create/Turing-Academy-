@@ -6,7 +6,9 @@ const bcrypt = require("bcryptjs");
 const prisma = new PrismaClient();
 
 async function main() {
-  const adminEmail = process.env.ADMIN_EMAIL || "admin@turingacademy.com";
+  const adminEmail = (
+    process.env.ADMIN_EMAIL || "danielortizvargas21@gmail.com"
+  ).toLowerCase();
   await prisma.user.upsert({
     where: { email: adminEmail },
     update: { role: "ADMIN" },

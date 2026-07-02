@@ -15,29 +15,17 @@ Construida con Next.js (cliente + servidor), PostgreSQL + Prisma, NextAuth y Str
 
 ## Requisitos
 
-- Node.js 20+
-- PostgreSQL 14+
+- Node.js 20+ (la base de datos es un archivo local SQLite — no hay que instalar nada más)
 
 ## Puesta en marcha
 
 ```bash
-# 1. Instalar dependencias
 npm install
-
-# 2. Configurar variables de entorno
-cp .env.example .env
-# Edita .env con tu DATABASE_URL, NEXTAUTH_SECRET, etc.
-
-# 3. Crear las tablas de la base de datos
-npx prisma migrate dev
-
-# 4. Cargar datos de ejemplo (curso de Primavera P6 + usuario admin)
-npm run db:seed
-
-# 5. Iniciar en modo desarrollo
 npm run dev
 ```
 
+Eso es todo. Al arrancar, `npm run dev` crea automáticamente la base de datos
+(`prisma/dev.db`) y carga el curso de ejemplo con el usuario administrador.
 Abre http://localhost:3000.
 
 ### Cuenta de administrador
@@ -89,7 +77,9 @@ storage/videos/    Videos MP4 autoalojados (no se suben a git)
 
 ## Despliegue
 
-Cualquier plataforma que soporte Next.js + PostgreSQL funciona: **Railway**,
-**Render**, **Vercel + Neon/Supabase**, o un VPS. Recuerda ejecutar
-`npx prisma migrate deploy` en cada despliegue y configurar todas las
-variables de `.env.example`.
+Para producción se recomienda cambiar la base de datos a **PostgreSQL**
+(Neon, Supabase, Railway…): en `prisma/schema.prisma` cambia el `datasource`
+a `provider = "postgresql"` con `url = env("DATABASE_URL")` y ejecuta
+`npx prisma db push`. Cualquier plataforma que soporte Next.js funciona:
+**Railway**, **Render**, **Vercel**, o un VPS. Configura en producción las
+variables de `.env.example` (especialmente `NEXTAUTH_SECRET`).

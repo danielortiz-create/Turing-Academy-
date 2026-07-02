@@ -6,8 +6,15 @@ import CredentialsProvider from "next-auth/providers/credentials";
 import GoogleProvider from "next-auth/providers/google";
 import { prisma } from "@/lib/prisma";
 
+// Correo que recibe rol de administrador automáticamente
+export const ADMIN_EMAIL = (
+  process.env.ADMIN_EMAIL ?? "danielortizvargas21@gmail.com"
+).toLowerCase();
+
 export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(prisma),
+  // En producción define NEXTAUTH_SECRET; este valor solo cubre el desarrollo local
+  secret: process.env.NEXTAUTH_SECRET ?? "turing-academy-secreto-solo-desarrollo",
   session: { strategy: "jwt" },
   pages: {
     signIn: "/login",
@@ -49,7 +56,7 @@ export const authOptions: NextAuthOptions = {
           where: { id: token.userId as string },
           select: { role: true },
         });
-        token.role = dbUser?.role ?? "STUDENT";
+        token.role = (dbUser?.role as "STUDENT" | "ADMIN") ?? "STUDENT";
       }
       return token;
     },
@@ -64,10 +71,7 @@ export const authOptions: NextAuthOptions = {
   events: {
     async createUser({ user }) {
       // La cuenta configurada como ADMIN_EMAIL recibe rol de administrador
-      if (
-        process.env.ADMIN_EMAIL &&
-        user.email?.toLowerCase() === process.env.ADMIN_EMAIL.toLowerCase()
-      ) {
+      if (user.email?.toLowerCase() === ADMIN_EMAIL) {
         await prisma.user.update({ where: { id: user.id }, data: { role: "ADMIN" } });
       }
     },

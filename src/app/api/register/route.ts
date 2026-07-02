@@ -1,6 +1,7 @@
 import bcrypt from "bcryptjs";
 import { NextResponse } from "next/server";
 import { z } from "zod";
+import { ADMIN_EMAIL } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
 const registerSchema = z.object({
@@ -28,8 +29,7 @@ export async function POST(req: Request) {
     );
   }
 
-  const isAdmin =
-    process.env.ADMIN_EMAIL && email === process.env.ADMIN_EMAIL.toLowerCase();
+  const isAdmin = email === ADMIN_EMAIL;
 
   await prisma.user.create({
     data: {
