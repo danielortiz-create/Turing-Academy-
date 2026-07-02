@@ -81,10 +81,13 @@ export default async function HomePage() {
             </dl>
           </div>
 
-          {/* Columna derecha: ilustración del cronograma */}
-          <div className="relative hidden min-h-[520px] lg:block" aria-hidden="true">
+          {/* Columna derecha: ilustración del cronograma, con leve perspectiva 3D */}
+          <div
+            className="relative hidden min-h-[520px] lg:block [transform:perspective(1800px)_rotateX(5deg)_rotateY(-9deg)_rotate(0.5deg)]"
+            aria-hidden="true"
+          >
             {/* Tarjeta principal: Gantt */}
-            <div className="absolute left-0 top-0 w-[82%] rounded-2xl border border-neutral-200 bg-white p-5 shadow-xl shadow-neutral-200/60">
+            <div className="absolute left-0 top-0 w-[82%] rounded-2xl border border-neutral-200 bg-white p-5 shadow-[0_24px_50px_-12px_rgba(30,36,48,0.25)]">
               <div className="flex items-center justify-between">
                 <p className="text-sm font-semibold text-ink">Cronograma del Proyecto</p>
                 <span className="rounded-md border border-neutral-200 px-2 py-0.5 text-[10px] text-neutral-400">
@@ -122,7 +125,7 @@ export default async function HomePage() {
             </div>
 
             {/* Rendimiento del proyecto (donut) */}
-            <div className="absolute right-0 top-16 z-20 w-60 rounded-2xl border border-neutral-200 bg-white p-4 shadow-xl shadow-neutral-200/60">
+            <div className="absolute right-0 top-16 z-20 w-60 rounded-2xl border border-neutral-200 bg-white p-4 shadow-[0_18px_40px_-10px_rgba(30,36,48,0.28)]">
               <p className="text-xs font-semibold text-ink">Rendimiento del Proyecto</p>
               <div className="mt-3 flex items-center gap-4">
                 <svg viewBox="0 0 36 36" className="h-20 w-20 -rotate-90">
@@ -160,7 +163,7 @@ export default async function HomePage() {
             </div>
 
             {/* Control de costos */}
-            <div className="absolute bottom-28 left-0 z-20 w-44 rounded-2xl border border-neutral-200 bg-white p-4 shadow-xl shadow-neutral-200/60">
+            <div className="absolute bottom-28 left-0 z-20 w-44 rounded-2xl border border-neutral-200 bg-white p-4 shadow-[0_18px_40px_-10px_rgba(30,36,48,0.28)]">
               <p className="text-[11px] font-medium text-neutral-500">Control de Costos</p>
               <p className="mt-1 text-xl font-bold text-ink">US$ 2.4M</p>
               <p className="text-[10px] text-neutral-400">Presupuesto</p>
@@ -173,7 +176,7 @@ export default async function HomePage() {
             </div>
 
             {/* Desviación del cronograma */}
-            <div className="absolute bottom-44 left-[196px] z-10 w-48 rounded-2xl border border-neutral-200 bg-white p-4 shadow-xl shadow-neutral-200/60">
+            <div className="absolute bottom-44 left-[196px] z-10 w-48 rounded-2xl border border-neutral-200 bg-white p-4 shadow-[0_18px_40px_-10px_rgba(30,36,48,0.28)]">
               <p className="text-[11px] font-medium text-neutral-500">Desviación del Cronograma</p>
               <p className="mt-1 text-xl font-bold text-brand">-5 días</p>
               <p className="text-[10px] text-neutral-400">Respecto a la línea base</p>
@@ -186,7 +189,7 @@ export default async function HomePage() {
             </div>
 
             {/* Cursos destacados */}
-            <div className="absolute bottom-0 right-0 z-20 w-[62%] rounded-2xl border border-neutral-200 bg-white p-4 shadow-xl shadow-neutral-200/60">
+            <div className="absolute bottom-0 right-0 z-20 w-[62%] rounded-2xl border border-neutral-200 bg-white p-4 shadow-[0_18px_40px_-10px_rgba(30,36,48,0.28)]">
               <div className="flex items-center justify-between">
                 <p className="text-xs font-semibold text-ink">Cursos destacados</p>
                 <span className="text-[10px] font-semibold text-brand">Ver todos</span>
