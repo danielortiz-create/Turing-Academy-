@@ -4,6 +4,24 @@ import { formatPrice } from "@/lib/access";
 
 export const dynamic = "force-dynamic";
 
+// Datos de la ilustración del hero (cronograma de ejemplo)
+const GANTT_ROWS = [
+  { name: "Inicio del proyecto", left: "2%", width: "16%", red: true },
+  { name: "Ingeniería", left: "12%", width: "30%", red: false },
+  { name: "Procura", left: "30%", width: "28%", red: true },
+  { name: "Construcción", left: "48%", width: "34%", red: false },
+  { name: "Pruebas", left: "72%", width: "18%", red: true },
+  { name: "Puesta en marcha", left: "84%", width: "12%", red: false },
+];
+
+const FEATURED = [
+  { badge: "P6", title: "Primavera P6 Básico a Avanzado", meta: "24 lecciones" },
+  { badge: "📅", title: "Planificación y Control de Proyectos", meta: "18 lecciones" },
+  { badge: "📊", title: "Control de Costos y Presupuestos", meta: "16 lecciones" },
+];
+
+const TRUSTED_BY = ["acciona", "sacyr", "COSAPI", "OHLA", "GRAÑA Y MONTERO", "pluspetrol"];
+
 export default async function HomePage() {
   const courses = await prisma.course.findMany({
     where: { published: true },
@@ -15,62 +33,202 @@ export default async function HomePage() {
   return (
     <>
       {/* Hero */}
-      <section className="bg-ink text-white">
-        <div className="mx-auto max-w-6xl px-4 py-20 sm:py-28">
-          <p className="mb-4 inline-block rounded-full border border-brand/50 bg-brand/10 px-4 py-1 text-sm font-medium text-brand-light">
-            Formación para ingenieros
-          </p>
-          <h1 className="max-w-3xl text-4xl font-bold leading-tight sm:text-5xl">
-            Domina <span className="text-brand-light">Primavera P6</span> y la
-            planificación de proyectos
-          </h1>
-          <p className="mt-5 max-w-2xl text-lg text-neutral-300">
-            Cursos prácticos de ingeniería en video, creados por profesionales.
-            Aprende a tu ritmo, con acceso de por vida y certifícate en las
-            herramientas que la industria exige.
-          </p>
-          <div className="mt-8 flex flex-wrap gap-3">
-            <Link href="/cursos" className="btn-primary text-lg">
-              Ver cursos
-            </Link>
-            <Link
-              href="/registro"
-              className="btn-secondary !border-neutral-600 !bg-transparent !text-white text-lg hover:!bg-white/10"
-            >
-              Crear cuenta gratis
-            </Link>
+      <section className="relative overflow-hidden bg-white">
+        {/* Resplandor decorativo detrás de la ilustración */}
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute -right-40 top-10 h-[560px] w-[560px] rounded-full bg-gradient-to-br from-brand/15 via-brand/5 to-transparent blur-2xl"
+        />
+        <div className="relative mx-auto grid max-w-7xl items-center gap-14 px-4 py-16 sm:py-20 lg:grid-cols-[1.05fr_1fr]">
+          {/* Columna izquierda: mensaje */}
+          <div>
+            <p className="flex items-center gap-3 text-[13px] font-semibold uppercase tracking-[0.18em] text-brand">
+              <span className="h-0.5 w-8 bg-brand" aria-hidden="true" />
+              Formación que construye resultados
+            </p>
+            <h1 className="mt-5 text-4xl font-bold leading-[1.12] tracking-tight text-ink sm:text-5xl xl:text-[3.4rem]">
+              Domina la planificación y el control de{" "}
+              <span className="text-brand">proyectos</span>
+            </h1>
+            <p className="mt-6 max-w-xl text-lg text-neutral-600">
+              Aprende Primavera P6, cronogramas, control de costos, reportes y
+              gestión de proyectos con expertos en la industria.
+            </p>
+            <div className="mt-8 flex flex-wrap gap-4">
+              <Link href="/cursos" className="btn-primary text-base">
+                Ver cursos <span aria-hidden="true">→</span>
+              </Link>
+              <Link
+                href="/registro"
+                className="btn-secondary !border-brand/40 !text-brand text-base hover:!border-brand hover:!bg-brand/5"
+              >
+                Empieza hoy <span aria-hidden="true">→</span>
+              </Link>
+            </div>
+
+            {/* Estadísticas */}
+            <dl className="mt-12 grid grid-cols-3 gap-4 divide-x divide-neutral-200">
+              {[
+                { title: "+1,000", text: "alumnos capacitados" },
+                { title: "Cursos prácticos", text: "100% aplicables" },
+                { title: "Expertos", text: "aprende con los mejores" },
+              ].map((s, i) => (
+                <div key={s.title} className={i > 0 ? "pl-4" : ""}>
+                  <dt className="text-[15px] font-bold text-ink">{s.title}</dt>
+                  <dd className="mt-0.5 text-[13px] text-neutral-500">{s.text}</dd>
+                </div>
+              ))}
+            </dl>
+          </div>
+
+          {/* Columna derecha: ilustración del cronograma */}
+          <div className="relative hidden min-h-[520px] lg:block" aria-hidden="true">
+            {/* Tarjeta principal: Gantt */}
+            <div className="absolute left-0 top-0 w-[82%] rounded-2xl border border-neutral-200 bg-white p-5 shadow-xl shadow-neutral-200/60">
+              <div className="flex items-center justify-between">
+                <p className="text-sm font-semibold text-ink">Cronograma del Proyecto</p>
+                <span className="rounded-md border border-neutral-200 px-2 py-0.5 text-[10px] text-neutral-400">
+                  ⚙ Filtro
+                </span>
+              </div>
+              <div className="mt-3 grid grid-cols-[92px_1fr] gap-2">
+                <p className="text-[10px] font-medium text-neutral-400">Actividades</p>
+                <div className="flex justify-between px-1 text-[10px] font-medium uppercase text-neutral-400">
+                  <span>May</span><span>Jun</span><span>Jul</span><span>Ago</span><span>Sep</span>
+                </div>
+              </div>
+              <div className="relative mt-1 space-y-2.5">
+                {/* Línea de "hoy" */}
+                <div className="absolute bottom-0 left-[calc(92px+8px+34%)] top-0 z-10 w-px bg-brand">
+                  <span className="absolute -top-1 left-1/2 h-2 w-2 -translate-x-1/2 rounded-full bg-brand" />
+                </div>
+                {GANTT_ROWS.map((row) => (
+                  <div key={row.name} className="grid grid-cols-[92px_1fr] items-center gap-2">
+                    <p className="flex items-center gap-1.5 truncate text-[10.5px] text-neutral-600">
+                      <span
+                        className={`h-1.5 w-1.5 shrink-0 rounded-full ${row.red ? "bg-brand" : "bg-ink"}`}
+                      />
+                      {row.name}
+                    </p>
+                    <div className="relative h-3.5 rounded bg-neutral-100">
+                      <div
+                        className={`absolute top-0 h-full rounded ${row.red ? "bg-brand" : "bg-ink"}`}
+                        style={{ left: row.left, width: row.width }}
+                      />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Rendimiento del proyecto (donut) */}
+            <div className="absolute right-0 top-16 z-20 w-60 rounded-2xl border border-neutral-200 bg-white p-4 shadow-xl shadow-neutral-200/60">
+              <p className="text-xs font-semibold text-ink">Rendimiento del Proyecto</p>
+              <div className="mt-3 flex items-center gap-4">
+                <svg viewBox="0 0 36 36" className="h-20 w-20 -rotate-90">
+                  <circle cx="18" cy="18" r="15" fill="none" stroke="#F0EFED" strokeWidth="5" />
+                  <circle
+                    cx="18" cy="18" r="15" fill="none" stroke="#C8102E" strokeWidth="5"
+                    strokeDasharray="67.9 94.2" strokeLinecap="round"
+                  />
+                </svg>
+                <div>
+                  <p className="text-2xl font-bold text-ink">72%</p>
+                  <p className="text-[11px] text-neutral-500">Completado</p>
+                </div>
+              </div>
+              <ul className="mt-3 space-y-1.5 text-[11px] text-neutral-600">
+                <li className="flex items-center justify-between">
+                  <span className="flex items-center gap-1.5">
+                    <span className="h-1.5 w-1.5 rounded-full bg-ink" /> En Progreso
+                  </span>
+                  <span className="font-semibold">12</span>
+                </li>
+                <li className="flex items-center justify-between">
+                  <span className="flex items-center gap-1.5">
+                    <span className="h-1.5 w-1.5 rounded-full bg-brand" /> Completadas
+                  </span>
+                  <span className="font-semibold">28</span>
+                </li>
+                <li className="flex items-center justify-between">
+                  <span className="flex items-center gap-1.5">
+                    <span className="h-1.5 w-1.5 rounded-full bg-neutral-300" /> Pendientes
+                  </span>
+                  <span className="font-semibold">7</span>
+                </li>
+              </ul>
+            </div>
+
+            {/* Control de costos */}
+            <div className="absolute bottom-28 left-0 z-20 w-44 rounded-2xl border border-neutral-200 bg-white p-4 shadow-xl shadow-neutral-200/60">
+              <p className="text-[11px] font-medium text-neutral-500">Control de Costos</p>
+              <p className="mt-1 text-xl font-bold text-ink">US$ 2.4M</p>
+              <p className="text-[10px] text-neutral-400">Presupuesto</p>
+              <div className="mt-2 flex items-center gap-2">
+                <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-neutral-100">
+                  <div className="h-full w-[72%] rounded-full bg-ink" />
+                </div>
+                <span className="text-[10px] font-bold text-brand">72%</span>
+              </div>
+            </div>
+
+            {/* Desviación del cronograma */}
+            <div className="absolute bottom-44 left-[196px] z-10 w-48 rounded-2xl border border-neutral-200 bg-white p-4 shadow-xl shadow-neutral-200/60">
+              <p className="text-[11px] font-medium text-neutral-500">Desviación del Cronograma</p>
+              <p className="mt-1 text-xl font-bold text-brand">-5 días</p>
+              <p className="text-[10px] text-neutral-400">Respecto a la línea base</p>
+              <svg viewBox="0 0 100 24" className="mt-2 h-6 w-full">
+                <polyline
+                  points="0,20 14,17 28,18 42,13 56,15 70,9 84,10 100,4"
+                  fill="none" stroke="#C8102E" strokeWidth="2" strokeLinecap="round"
+                />
+              </svg>
+            </div>
+
+            {/* Cursos destacados */}
+            <div className="absolute bottom-0 right-0 z-20 w-[62%] rounded-2xl border border-neutral-200 bg-white p-4 shadow-xl shadow-neutral-200/60">
+              <div className="flex items-center justify-between">
+                <p className="text-xs font-semibold text-ink">Cursos destacados</p>
+                <span className="text-[10px] font-semibold text-brand">Ver todos</span>
+              </div>
+              <div className="mt-3 grid grid-cols-3 gap-2">
+                {FEATURED.map((c) => (
+                  <div key={c.title} className="rounded-xl border border-neutral-200 p-2.5">
+                    <span className="inline-flex h-7 w-7 items-center justify-center rounded-md bg-brand text-[11px] font-bold text-white">
+                      {c.badge}
+                    </span>
+                    <p className="mt-2 text-[10.5px] font-semibold leading-tight text-ink">
+                      {c.title}
+                    </p>
+                    <p className="mt-1 text-[9.5px] text-neutral-400">{c.meta}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
         </div>
-      </section>
 
-      {/* Beneficios */}
-      <section className="mx-auto max-w-6xl px-4 py-16">
-        <div className="grid gap-6 sm:grid-cols-3">
-          {[
-            {
-              title: "Videos paso a paso",
-              text: "Lecciones en video organizadas por módulos, desde nivel cero hasta control de proyectos real.",
-            },
-            {
-              title: "Acceso protegido",
-              text: "Tu compra te da acceso personal e ilimitado. Inicia sesión con tu correo o tu cuenta de Google.",
-            },
-            {
-              title: "Enfoque en ingeniería",
-              text: "Ejemplos reales de construcción e ingeniería: WBS, ruta crítica, recursos, líneas base y avance.",
-            },
-          ].map((f) => (
-            <div key={f.title} className="card p-6">
-              <h3 className="mb-2 text-lg font-semibold">{f.title}</h3>
-              <p className="text-neutral-600">{f.text}</p>
-            </div>
-          ))}
+        {/* Empresas que confían */}
+        <div className="relative border-t border-neutral-100">
+          <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-center gap-x-10 gap-y-3 px-4 py-7">
+            <p className="text-[10.5px] font-semibold uppercase tracking-[0.2em] text-neutral-400">
+              Con la confianza de profesionales de
+            </p>
+            {TRUSTED_BY.map((name) => (
+              <span
+                key={name}
+                className="text-sm font-bold uppercase tracking-wide text-neutral-300"
+              >
+                {name}
+              </span>
+            ))}
+          </div>
         </div>
       </section>
 
       {/* Cursos destacados */}
       {courses.length > 0 && (
-        <section className="bg-white py-16">
+        <section className="bg-neutral-50 py-16">
           <div className="mx-auto max-w-6xl px-4">
             <h2 className="mb-8 text-3xl font-bold">Cursos disponibles</h2>
             <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
