@@ -69,13 +69,50 @@ export default async function HomePage() {
             {/* Estadísticas */}
             <dl className="mt-12 grid grid-cols-3 gap-4 divide-x divide-neutral-200">
               {[
-                { title: "+1,000", text: "alumnos capacitados" },
-                { title: "Cursos prácticos", text: "100% aplicables" },
-                { title: "Expertos", text: "aprende con los mejores" },
+                {
+                  title: "+1,000",
+                  text: "alumnos capacitados",
+                  // Personas
+                  icon: (
+                    <path d="M9 11a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7zm7 .5a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM2.5 19c0-3 2.9-5 6.5-5s6.5 2 6.5 5m1-.5c1.9.2 4 1 4 .5 0-2.4-1.9-4-4.5-4.4" />
+                  ),
+                },
+                {
+                  title: "Cursos prácticos",
+                  text: "100% aplicables",
+                  // Birrete de graduación
+                  icon: (
+                    <path d="M12 4 2.5 8.5 12 13l9.5-4.5L12 4zm-6 7v4.5c0 1.4 2.7 2.8 6 2.8s6-1.4 6-2.8V11m2.5-2v5" />
+                  ),
+                },
+                {
+                  title: "Expertos",
+                  text: "aprende con los mejores",
+                  // Medalla
+                  icon: (
+                    <path d="M12 15.5a5 5 0 1 0 0-10 5 5 0 0 0 0 10zm0-7.5 1 1.9 2.1.3-1.5 1.5.3 2.1-1.9-1-1.9 1 .3-2.1-1.5-1.5 2.1-.3L12 8zm-3.5 6.6L6 21l3.5-1.5L12 21l2.5-1.5L18 21l-2.5-6.4" />
+                  ),
+                },
               ].map((s, i) => (
-                <div key={s.title} className={i > 0 ? "pl-4" : ""}>
-                  <dt className="text-[15px] font-bold text-ink">{s.title}</dt>
-                  <dd className="mt-0.5 text-[13px] text-neutral-500">{s.text}</dd>
+                <div key={s.title} className={`flex items-center gap-3 ${i > 0 ? "pl-4" : ""}`}>
+                  <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-brand/15 bg-brand/5">
+                    <svg
+                      viewBox="0 0 24 24"
+                      className="h-[22px] w-[22px]"
+                      fill="none"
+                      stroke="#C8102E"
+                      strokeWidth="1.7"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      aria-hidden="true"
+                    >
+                      {s.icon}
+                    </svg>
+                  </span>
+                  <div>
+                    <dt className="text-[15px] font-bold text-ink">{s.title}</dt>
+                    <dd className="mt-0.5 text-[13px] text-neutral-500">{s.text}</dd>
+                  </div>
                 </div>
               ))}
             </dl>
@@ -83,39 +120,39 @@ export default async function HomePage() {
 
           {/* Columna derecha: ilustración del cronograma, con leve perspectiva 3D */}
           <div
-            className="relative hidden min-h-[520px] lg:block [transform:perspective(1800px)_rotateX(5deg)_rotateY(-9deg)_rotate(0.5deg)]"
+            className="relative hidden min-h-[600px] lg:block [transform:perspective(1800px)_rotateX(4deg)_rotateY(-16deg)_rotate(-0.5deg)]"
             aria-hidden="true"
           >
             {/* Tarjeta principal: Gantt */}
-            <div className="absolute left-0 top-0 w-[82%] rounded-2xl border border-neutral-200 bg-white p-5 shadow-[0_24px_50px_-12px_rgba(30,36,48,0.25)]">
+            <div className="absolute left-0 top-0 w-full rounded-2xl border border-neutral-200 bg-white p-7 shadow-[0_24px_50px_-12px_rgba(30,36,48,0.25)]">
               <div className="flex items-center justify-between">
-                <p className="text-sm font-semibold text-ink">Cronograma del Proyecto</p>
-                <span className="rounded-md border border-neutral-200 px-2 py-0.5 text-[10px] text-neutral-400">
+                <p className="text-lg font-semibold text-ink">Cronograma del Proyecto</p>
+                <span className="rounded-md border border-neutral-200 px-2.5 py-1 text-xs text-neutral-400">
                   ⚙ Filtro
                 </span>
               </div>
-              <div className="mt-3 grid grid-cols-[92px_1fr] gap-2">
-                <p className="text-[10px] font-medium text-neutral-400">Actividades</p>
-                <div className="flex justify-between px-1 text-[10px] font-medium uppercase text-neutral-400">
+              <div className="mt-5 grid grid-cols-[128px_1fr] gap-3">
+                <p className="text-xs font-medium text-neutral-400">Actividades</p>
+                <div className="flex justify-between px-1 text-xs font-medium uppercase text-neutral-400">
                   <span>May</span><span>Jun</span><span>Jul</span><span>Ago</span><span>Sep</span>
                 </div>
               </div>
-              <div className="relative mt-1 space-y-2.5">
+              <div className="relative mt-2 space-y-4">
                 {/* Línea de "hoy" */}
-                <div className="absolute bottom-0 left-[calc(92px+8px+34%)] top-0 z-10 w-px bg-brand">
-                  <span className="absolute -top-1 left-1/2 h-2 w-2 -translate-x-1/2 rounded-full bg-brand" />
+                <div className="absolute bottom-0 left-[calc(128px+12px+34%)] top-0 z-10 w-px bg-brand">
+                  <span className="absolute -top-1 left-1/2 h-2.5 w-2.5 -translate-x-1/2 rounded-full bg-brand" />
                 </div>
                 {GANTT_ROWS.map((row) => (
-                  <div key={row.name} className="grid grid-cols-[92px_1fr] items-center gap-2">
-                    <p className="flex items-center gap-1.5 truncate text-[10.5px] text-neutral-600">
+                  <div key={row.name} className="grid grid-cols-[128px_1fr] items-center gap-3">
+                    <p className="flex items-center gap-2 truncate text-[13px] text-neutral-600">
                       <span
-                        className={`h-1.5 w-1.5 shrink-0 rounded-full ${row.red ? "bg-brand" : "bg-ink"}`}
+                        className={`h-2 w-2 shrink-0 rounded-full ${row.red ? "bg-brand" : "bg-ink"}`}
                       />
                       {row.name}
                     </p>
-                    <div className="relative h-3.5 rounded bg-neutral-100">
+                    <div className="relative h-5 rounded-md bg-neutral-100">
                       <div
-                        className={`absolute top-0 h-full rounded ${row.red ? "bg-brand" : "bg-ink"}`}
+                        className={`absolute top-0 h-full rounded-md ${row.red ? "bg-brand" : "bg-ink"}`}
                         style={{ left: row.left, width: row.width }}
                       />
                     </div>
@@ -125,7 +162,7 @@ export default async function HomePage() {
             </div>
 
             {/* Rendimiento del proyecto (donut) */}
-            <div className="absolute right-0 top-16 z-20 w-60 rounded-2xl border border-neutral-200 bg-white p-4 shadow-[0_18px_40px_-10px_rgba(30,36,48,0.28)]">
+            <div className="absolute -right-2 top-[205px] z-20 w-64 rounded-2xl border border-neutral-200 bg-white p-4 shadow-[0_18px_40px_-10px_rgba(30,36,48,0.28)]">
               <p className="text-xs font-semibold text-ink">Rendimiento del Proyecto</p>
               <div className="mt-3 flex items-center gap-4">
                 <svg viewBox="0 0 36 36" className="h-20 w-20 -rotate-90">
@@ -163,7 +200,7 @@ export default async function HomePage() {
             </div>
 
             {/* Control de costos */}
-            <div className="absolute bottom-28 left-0 z-20 w-44 rounded-2xl border border-neutral-200 bg-white p-4 shadow-[0_18px_40px_-10px_rgba(30,36,48,0.28)]">
+            <div className="absolute bottom-14 left-0 z-20 w-48 rounded-2xl border border-neutral-200 bg-white p-4 shadow-[0_18px_40px_-10px_rgba(30,36,48,0.28)]">
               <p className="text-[11px] font-medium text-neutral-500">Control de Costos</p>
               <p className="mt-1 text-xl font-bold text-ink">US$ 2.4M</p>
               <p className="text-[10px] text-neutral-400">Presupuesto</p>
@@ -176,7 +213,7 @@ export default async function HomePage() {
             </div>
 
             {/* Desviación del cronograma */}
-            <div className="absolute bottom-44 left-[196px] z-10 w-48 rounded-2xl border border-neutral-200 bg-white p-4 shadow-[0_18px_40px_-10px_rgba(30,36,48,0.28)]">
+            <div className="absolute bottom-48 left-[215px] z-10 w-52 rounded-2xl border border-neutral-200 bg-white p-4 shadow-[0_18px_40px_-10px_rgba(30,36,48,0.28)]">
               <p className="text-[11px] font-medium text-neutral-500">Desviación del Cronograma</p>
               <p className="mt-1 text-xl font-bold text-brand">-5 días</p>
               <p className="text-[10px] text-neutral-400">Respecto a la línea base</p>
@@ -189,7 +226,7 @@ export default async function HomePage() {
             </div>
 
             {/* Cursos destacados */}
-            <div className="absolute bottom-0 right-0 z-20 w-[62%] rounded-2xl border border-neutral-200 bg-white p-4 shadow-[0_18px_40px_-10px_rgba(30,36,48,0.28)]">
+            <div className="absolute bottom-0 right-0 z-30 w-[58%] rounded-2xl border border-neutral-200 bg-white p-4 shadow-[0_18px_40px_-10px_rgba(30,36,48,0.28)]">
               <div className="flex items-center justify-between">
                 <p className="text-xs font-semibold text-ink">Cursos destacados</p>
                 <span className="text-[10px] font-semibold text-brand">Ver todos</span>
