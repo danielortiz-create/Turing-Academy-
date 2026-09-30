@@ -7,8 +7,9 @@ Construida con Next.js (cliente + servidor), Prisma (SQLite en desarrollo), Next
 
 - 🎓 Catálogo de cursos con módulos y lecciones en video
 - 🔐 Inicio de sesión con **correo/contraseña o Google (Gmail)**
-- 🧑‍🏫 Cursos en **diapositivas con tutor IA** (Claude): el alumno pregunta sobre la slide actual
-  o pide que se la expliquen de otra forma, y luego sigue con la lección
+- 🧑‍🏫 **Lecciones guiadas por un tutor IA** (Claude), al estilo DataCamp: el tutor explica cada
+  diapositiva adaptada al perfil del alumno, hace una pregunta de comprobación con retroalimentación
+  y responde dudas antes de volver a la lección
 - 🎬 Videos protegidos: la URL solo se entrega a usuarios que compraron el curso
   (compatible con YouTube, Vimeo o archivos MP4 alojados en el servidor)
 - 💳 Pagos con **Stripe Checkout**
@@ -57,18 +58,30 @@ administrador automáticamente.
 
 ### Tutor IA (Claude API)
 
-El curso "Introducción a la gestión de proyectos" usa diapositivas con un tutor IA.
+El curso "Introducción a la gestión de proyectos" usa **lecciones guiadas**: la diapositiva queda a la
+izquierda como pizarra y el tutor conduce la lección en el panel derecho.
+
+1. La primera vez, el alumno indica su rol y su experiencia (se guarda en su perfil).
+2. El tutor explica la diapositiva con ejemplos de su contexto.
+3. Pregunta de opción múltiple: si falla, recibe una pista sin la respuesta; al segundo error se le explica.
+4. El ritmo se adapta: si acierta a la primera, la siguiente explicación es más breve; si falla, más pausada.
+5. En cualquier momento puede preguntar algo libre y luego "Volver a la lección".
+
+Configuración:
 
 1. Crea una clave en https://console.anthropic.com/settings/keys
 2. Crea un archivo `.env` en la carpeta del proyecto (si no existe) con la línea:
    `ANTHROPIC_API_KEY="sk-ant-..."`
 3. Reinicia `npm run dev`
 
-- Cada alumno tiene **20 preguntas por día** (constante `DAILY_LIMIT` en `src/lib/tutor.ts`).
-  Pedir "explícalo de otra forma" también cuenta como pregunta.
-- Modelo: `claude-opus-5-5` con esfuerzo bajo, para respuestas breves (`TUTOR_MODEL` en `src/lib/tutor.ts`).
-- El contenido de las diapositivas está en `prisma/courses/gestion-proyectos.js`. Para cambiarlo,
-  edita ese archivo y ejecuta `npm run db:seed` (el progreso de los alumnos se conserva).
+- Modelo: `claude-sonnet-5-5` con esfuerzo bajo (`TUTOR_MODEL` en `src/lib/tutor.ts`).
+- Límites por alumno (en `src/lib/tutor.ts`): **5 lecciones guiadas nuevas por día**
+  (`DAILY_LESSON_LIMIT`), 60 interacciones por lección (`LESSON_CALL_CAP`) y 200 por día (`DAILY_CALL_CAP`).
+- Sin clave o al llegar al límite, la lección sigue funcionando sin IA: se muestra el contenido fijo de
+  la diapositiva y la explicación escrita de cada respuesta.
+- El contenido (diapositivas, preguntas y explicaciones de cada opción) está en
+  `prisma/courses/gestion-proyectos.js`. Para cambiarlo, edita ese archivo y ejecuta `npm run db:seed`
+  (el progreso de los alumnos se conserva).
 
 ### Videos
 

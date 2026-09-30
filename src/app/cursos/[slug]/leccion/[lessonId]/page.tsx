@@ -2,12 +2,12 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { AiBadge } from "@/components/AiBadge";
 import { CompleteLessonButton } from "@/components/CompleteLessonButton";
-import { SlideLesson } from "@/components/SlideLesson";
+import { GuidedLesson } from "@/components/GuidedLesson";
 import { VideoPlayer } from "@/components/VideoPlayer";
 import { canAccessCourse } from "@/lib/access";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { parseBullets } from "@/lib/tutor";
+import { parseBullets, parseQuiz } from "@/lib/tutor";
 
 export const dynamic = "force-dynamic";
 
@@ -53,9 +53,22 @@ export default async function LessonPage({
   const isSlides = lesson.videoProvider === "SLIDES";
   const slides = isSlides
     ? (await prisma.slide.findMany({ where: { lessonId: lesson.id }, orderBy: { order: "asc" } })).map(
-        (s) => ({ id: s.id, title: s.title, bullets: parseBullets(s.bullets), highlight: s.highlight })
+        (s) => ({
+          id: s.id,
+          title: s.title,
+          bullets: parseBullets(s.bullets),
+          highlight: s.highlight,
+          quiz: parseQuiz(s.quiz),
+        })
       )
     : [];
+  const learnerProfile =
+    isSlides && session?.user
+      ? await prisma.learnerProfile.findUnique({
+          where: { userId: session.user.id },
+          select: { role: true, experience: true },
+        })
+      : null;
   const nextAccessible = next && (hasAccess || next.isFreePreview) ? next : null;
 
   const header = (
@@ -72,18 +85,19 @@ export default async function LessonPage({
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-8">
-      {/* Lección en diapositivas: slide + tutor IA a todo el ancho */}
+      {/* Lección guiada: el tutor IA conduce y la slide acompaña, a todo el ancho */}
       {isSlides && (
         <div className="mb-10">
           {header}
           <div className="mt-4">
             {slides.length > 0 ? (
-              <SlideLesson
+              <GuidedLesson
                 key={lesson.id}
                 lessonId={lesson.id}
                 lessonTitle={lesson.title}
                 slides={slides}
                 isLoggedIn={Boolean(session?.user)}
+                initialProfile={learnerProfile}
                 nextLessonHref={nextAccessible ? `/cursos/${slug}/leccion/${nextAccessible.id}` : null}
               />
             ) : (

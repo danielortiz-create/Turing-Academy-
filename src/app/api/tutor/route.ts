@@ -6,51 +6,67 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import {
   ADAPT_STYLES,
-  DAILY_LIMIT,
+  DAILY_LESSON_LIMIT,
   TUTOR_MODEL,
   buildAdaptRequest,
   buildCoursePrompt,
+  buildFeedbackRequest,
   buildSlidePrompt,
-  consumeQuestion,
+  buildTeachRequest,
+  consumeCall,
   getAnthropic,
   isTutorConfigured,
   parseBullets,
-  questionsLeft,
-  refundQuestion,
+  parseQuiz,
+  refundCall,
+  usageStatus,
 } from "@/lib/tutor";
 
-// Estado del tutor para el alumno: si está configurado y cuántas preguntas le quedan hoy
-export async function GET() {
+// Estado del tutor para el alumno: si está configurado y cuántas lecciones guiadas le quedan hoy
+export async function GET(req: Request) {
   const session = await auth();
   if (!session?.user) {
     return NextResponse.json({ error: "Inicia sesión para usar el tutor IA" }, { status: 401 });
   }
+  const lessonId = new URL(req.url).searchParams.get("lessonId") ?? undefined;
+  const status = await usageStatus(session.user.id, lessonId);
   return NextResponse.json({
     configured: isTutorConfigured(),
-    left: await questionsLeft(session.user.id),
-    limit: DAILY_LIMIT,
+    lessonsLeft: status.lessonsLeft,
+    lessonStarted: status.lessonStarted,
+    lessonLimit: DAILY_LESSON_LIMIT,
   });
 }
 
 const bodySchema = z.object({
   lessonId: z.string().min(1),
   slideId: z.string().min(1),
-  mode: z.enum(["chat", "adapt"]),
+  mode: z.enum(["teach", "feedback", "chat", "adapt"]),
   style: z.enum(Object.keys(ADAPT_STYLES) as [keyof typeof ADAPT_STYLES]).optional(),
+  pace: z.enum(["normal", "rapido", "pausado"]).default("normal"),
+  chosenIndex: z.number().int().min(0).optional(),
+  attempt: z.number().int().min(1).max(5).default(1),
   messages: z
     .array(
       z.object({
         role: z.enum(["user", "assistant"]),
-        content: z.string().min(1).max(2000),
+        content: z.string().min(1).max(4000),
       })
     )
     .max(12)
     .default([]),
 });
 
-// El alumno pregunta sobre la slide actual (mode "chat") o pide verla
-// explicada de otra forma (mode "adapt"). La respuesta llega en streaming
-// como texto plano.
+const LIMIT_MESSAGES = {
+  lessons: `Ya empezaste ${DAILY_LESSON_LIMIT} lecciones guiadas hoy, el máximo diario. Puedes seguir con las lecciones que ya empezaste hoy, o volver mañana.`,
+  lesson_cap: "Llegaste al máximo de interacciones con el tutor en esta lección por hoy. Puedes continuar mañana.",
+  daily: "Llegaste al máximo de interacciones con el tutor por hoy. Vuelve mañana para seguir aprendiendo.",
+};
+
+// El tutor conduce la lección: explica la slide ("teach"), comenta la
+// respuesta a la pregunta de comprobación ("feedback"), responde preguntas
+// libres ("chat") o reescribe la slide en otro estilo ("adapt").
+// La respuesta llega en streaming como texto plano.
 export async function POST(req: Request) {
   const session = await auth();
   if (!session?.user) {
@@ -61,7 +77,7 @@ export async function POST(req: Request) {
   if (!parsed.success) {
     return NextResponse.json({ error: "Solicitud inválida" }, { status: 400 });
   }
-  const { lessonId, slideId, mode, style, messages } = parsed.data;
+  const { lessonId, slideId, mode, style, pace, chosenIndex, attempt, messages } = parsed.data;
   if (mode === "chat" && messages.at(-1)?.role !== "user") {
     return NextResponse.json({ error: "Escribe una pregunta" }, { status: 400 });
   }
@@ -96,6 +112,12 @@ export async function POST(req: Request) {
   if (!lesson || slideIndex === -1) {
     return NextResponse.json({ error: "Diapositiva no encontrada" }, { status: 404 });
   }
+  const slide = lesson.slides[slideIndex];
+
+  const quiz = parseQuiz(slide.quiz);
+  if (mode === "feedback" && (!quiz || chosenIndex === undefined || chosenIndex >= quiz.options.length)) {
+    return NextResponse.json({ error: "Respuesta inválida" }, { status: 400 });
+  }
 
   const course = lesson.module.course;
   const allowed =
@@ -113,28 +135,45 @@ export async function POST(req: Request) {
   }
 
   const userId = session.user.id;
-  if (!(await consumeQuestion(userId))) {
-    return NextResponse.json(
-      { error: `Llegaste al límite de ${DAILY_LIMIT} preguntas por hoy. Vuelve mañana para seguir preguntando.` },
-      { status: 429 }
-    );
+  const usage = await consumeCall(userId, lessonId);
+  if (!usage.ok) {
+    return NextResponse.json({ error: LIMIT_MESSAGES[usage.reason], reason: usage.reason }, { status: 429 });
   }
 
-  const slide = lesson.slides[slideIndex];
+  const profile = await prisma.learnerProfile.findUnique({ where: { userId } });
   const system: Anthropic.Beta.BetaTextBlockParam[] = [
     { type: "text", text: buildCoursePrompt(course), cache_control: { type: "ephemeral" } },
     {
       type: "text",
-      text: buildSlidePrompt(lesson.title, slideIndex + 1, lesson.slides.length, {
-        title: slide.title,
-        bullets: parseBullets(slide.bullets),
-        highlight: slide.highlight,
-        tutorNotes: slide.tutorNotes,
-      }),
+      text: buildSlidePrompt(
+        lesson.title,
+        slideIndex + 1,
+        lesson.slides.length,
+        {
+          title: slide.title,
+          bullets: parseBullets(slide.bullets),
+          highlight: slide.highlight,
+          tutorNotes: slide.tutorNotes,
+        },
+        profile
+      ),
     },
   ];
-  const apiMessages: Anthropic.Beta.BetaMessageParam[] =
-    mode === "adapt" ? [{ role: "user", content: buildAdaptRequest(style!) }] : messages;
+
+  let apiMessages: Anthropic.Beta.BetaMessageParam[];
+  switch (mode) {
+    case "teach":
+      apiMessages = [{ role: "user", content: buildTeachRequest(pace, slideIndex === 0) }];
+      break;
+    case "feedback":
+      apiMessages = [{ role: "user", content: buildFeedbackRequest(quiz!, chosenIndex!, attempt) }];
+      break;
+    case "adapt":
+      apiMessages = [{ role: "user", content: buildAdaptRequest(style!) }];
+      break;
+    default:
+      apiMessages = messages;
+  }
 
   const stream = getAnthropic().beta.messages.stream({
     model: TUTOR_MODEL,
@@ -165,7 +204,7 @@ export async function POST(req: Request) {
           );
         }
       } catch (error) {
-        if (!wroteText) await refundQuestion(userId);
+        if (!wroteText) await refundCall(userId, lessonId);
         controller.enqueue(encoder.encode(`\n\n⚠️ ${tutorErrorMessage(error)}`));
       } finally {
         controller.close();
@@ -177,11 +216,7 @@ export async function POST(req: Request) {
   });
 
   return new Response(body, {
-    headers: {
-      "Content-Type": "text/plain; charset=utf-8",
-      "Cache-Control": "no-store",
-      "X-Questions-Left": String(await questionsLeft(userId)),
-    },
+    headers: { "Content-Type": "text/plain; charset=utf-8", "Cache-Control": "no-store" },
   });
 }
 

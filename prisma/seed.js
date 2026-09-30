@@ -199,6 +199,7 @@ async function syncSlideCourse(def) {
           bullets: JSON.stringify(slide.bullets),
           highlight: slide.highlight ?? null,
           tutorNotes: slide.tutorNotes ?? null,
+          quiz: slide.quiz ? JSON.stringify(slide.quiz) : null,
         })),
       });
     }
