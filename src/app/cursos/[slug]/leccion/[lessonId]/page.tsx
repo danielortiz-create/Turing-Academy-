@@ -1,10 +1,13 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
+import { AiBadge } from "@/components/AiBadge";
 import { CompleteLessonButton } from "@/components/CompleteLessonButton";
+import { SlideLesson } from "@/components/SlideLesson";
 import { VideoPlayer } from "@/components/VideoPlayer";
 import { canAccessCourse } from "@/lib/access";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { parseBullets } from "@/lib/tutor";
 
 export const dynamic = "force-dynamic";
 
@@ -47,30 +50,71 @@ export default async function LessonPage({
   const prev = index > 0 ? allLessons[index - 1] : null;
   const next = index < allLessons.length - 1 ? allLessons[index + 1] : null;
 
+  const isSlides = lesson.videoProvider === "SLIDES";
+  const slides = isSlides
+    ? (await prisma.slide.findMany({ where: { lessonId: lesson.id }, orderBy: { order: "asc" } })).map(
+        (s) => ({ id: s.id, title: s.title, bullets: parseBullets(s.bullets), highlight: s.highlight })
+      )
+    : [];
+  const nextAccessible = next && (hasAccess || next.isFreePreview) ? next : null;
+
+  const header = (
+    <>
+      <Link href={`/cursos/${slug}`} className="text-sm text-neutral-500 hover:text-brand">
+        ← Volver al curso
+      </Link>
+      <div className="mt-2 flex flex-wrap items-center gap-3">
+        <h1 className="text-2xl font-bold">{lesson.title}</h1>
+        {course.aiGenerated && <AiBadge />}
+      </div>
+    </>
+  );
+
   return (
     <div className="mx-auto max-w-7xl px-4 py-8">
+      {/* Lección en diapositivas: slide + tutor IA a todo el ancho */}
+      {isSlides && (
+        <div className="mb-10">
+          {header}
+          <div className="mt-4">
+            {slides.length > 0 ? (
+              <SlideLesson
+                key={lesson.id}
+                lessonId={lesson.id}
+                lessonTitle={lesson.title}
+                slides={slides}
+                isLoggedIn={Boolean(session?.user)}
+                nextLessonHref={nextAccessible ? `/cursos/${slug}/leccion/${nextAccessible.id}` : null}
+              />
+            ) : (
+              <p className="card p-6 text-neutral-500">Esta lección aún no tiene diapositivas.</p>
+            )}
+          </div>
+        </div>
+      )}
+
       <div className="grid gap-8 lg:grid-cols-[1fr_340px]">
         {/* Reproductor y detalles */}
         <div>
-          <Link href={`/cursos/${slug}`} className="text-sm text-neutral-500 hover:text-brand">
-            ← Volver al curso
-          </Link>
-          <h1 className="mt-2 text-2xl font-bold">{lesson.title}</h1>
-
-          <div className="mt-4">
-            <VideoPlayer lessonId={lesson.id} />
-          </div>
+          {!isSlides && (
+            <>
+              {header}
+              <div className="mt-4">
+                <VideoPlayer lessonId={lesson.id} />
+              </div>
+            </>
+          )}
 
           <div className="mt-5 flex flex-wrap items-center justify-between gap-3">
             <div className="flex gap-2">
               {prev && (
                 <Link href={`/cursos/${slug}/leccion/${prev.id}`} className="btn-secondary">
-                  ← Anterior
+                  ← Lección anterior
                 </Link>
               )}
               {next && (
                 <Link href={`/cursos/${slug}/leccion/${next.id}`} className="btn-primary">
-                  Siguiente →
+                  Lección siguiente →
                 </Link>
               )}
             </div>

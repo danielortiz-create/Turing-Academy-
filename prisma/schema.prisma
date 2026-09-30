@@ -10,7 +10,7 @@ datasource db {
 }
 
 // Valores de role: STUDENT | ADMIN
-// Valores de videoProvider: YOUTUBE | VIMEO | MP4
+// Valores de videoProvider: YOUTUBE | VIMEO | MP4 | SLIDES
 // Valores de status (Purchase): PENDING | PAID | REFUNDED
 // (SQLite no soporta enums de Prisma, por eso son String)
 
@@ -27,6 +27,7 @@ model User {
   sessions      Session[]
   purchases     Purchase[]
   progress      Progress[]
+  tutorUsage    TutorUsage[]
 }
 
 // Cuentas OAuth vinculadas (Google) — requerido por NextAuth
@@ -74,6 +75,8 @@ model Course {
   priceCents  Int        @default(0)
   imageUrl    String?
   published   Boolean    @default(false)
+  // Muestra la etiqueta "Generado con IA" en el curso
+  aiGenerated Boolean    @default(false)
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @updatedAt
   modules     Module[]
@@ -103,6 +106,22 @@ model Lesson {
   isFreePreview Boolean    @default(false)
   module        Module     @relation(fields: [moduleId], references: [id], onDelete: Cascade)
   progress      Progress[]
+  slides        Slide[]
+}
+
+// Diapositiva de una lección tipo SLIDES. El texto es fijo; el tutor IA
+// puede adaptarlo a pedido del alumno sin modificar este contenido.
+model Slide {
+  id         String  @id @default(cuid())
+  lessonId   String
+  order      Int     @default(0)
+  title      String
+  // Arreglo JSON de viñetas, p. ej. ["Punto 1", "Punto 2"]
+  bullets    String
+  highlight  String?
+  // Contexto extra que solo ve el tutor IA (no se muestra en la slide)
+  tutorNotes String?
+  lesson     Lesson  @relation(fields: [lessonId], references: [id], onDelete: Cascade)
 }
 
 model Purchase {
@@ -129,4 +148,14 @@ model Progress {
   lesson      Lesson    @relation(fields: [lessonId], references: [id], onDelete: Cascade)
 
   @@id([userId, lessonId])
+}
+
+// Preguntas al tutor IA por usuario y día, para el límite diario
+model TutorUsage {
+  userId String
+  day    String // YYYY-MM-DD (UTC)
+  count  Int    @default(0)
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([userId, day])
 }

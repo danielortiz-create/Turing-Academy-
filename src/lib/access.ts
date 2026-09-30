@@ -27,3 +27,13 @@ export function formatPrice(cents: number): string {
     currency: "USD",
   }).format(cents / 100);
 }
+
+// Iniciales para la miniatura del curso: "P6" para Primavera, "GP" para
+// "Introducción a la gestión de proyectos", etc.
+export function courseInitials(title: string): string {
+  const p6 = /primavera\s*p6/i.test(title);
+  if (p6) return "P6";
+  const skip = new Set(["a", "al", "de", "del", "la", "las", "el", "los", "y", "en", "introduccion", "introducción", "curso"]);
+  const words = title.split(/\s+/).filter((w) => !skip.has(w.toLowerCase()));
+  return words.slice(0, 2).map((w) => w[0]?.toUpperCase() ?? "").join("") || "C";
+}

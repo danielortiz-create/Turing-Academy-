@@ -1,6 +1,7 @@
 import Link from "next/link";
+import { AiBadge } from "@/components/AiBadge";
 import { prisma } from "@/lib/prisma";
-import { formatPrice } from "@/lib/access";
+import { courseInitials, formatPrice } from "@/lib/access";
 
 export const dynamic = "force-dynamic";
 
@@ -33,10 +34,11 @@ export default async function CoursesPage() {
                 className="card group overflow-hidden transition hover:shadow-md"
               >
                 <div className="flex aspect-video items-center justify-center bg-ink text-5xl font-bold text-brand-light">
-                  P6
+                  {courseInitials(course.title)}
                 </div>
                 <div className="p-5">
                   <h3 className="text-lg font-semibold group-hover:text-brand">{course.title}</h3>
+                  {course.aiGenerated && <AiBadge className="mt-2" />}
                   <p className="mt-1 line-clamp-2 text-sm text-neutral-600">{course.subtitle}</p>
                   <div className="mt-4 flex items-center justify-between">
                     <span className="text-sm text-neutral-500">

@@ -28,11 +28,11 @@ export function GMark({ className = "h-9 w-9" }: { className?: string }) {
 
 export function Logo({ withText = true }: { withText?: boolean }) {
   return (
-    <Link href="/" className="flex items-center gap-2.5">
+    <Link href="/" className="flex items-center gap-2 sm:gap-2.5">
       <GMark />
       {withText && (
         <span className="flex flex-col leading-none">
-          <span className="text-lg font-bold tracking-[0.25em] text-ink">GANTT</span>
+          <span className="text-lg font-bold tracking-[0.18em] text-ink sm:tracking-[0.25em]">GANTT</span>
           <span className="mt-1 flex items-center gap-1.5 text-[9px] font-semibold tracking-[0.35em] text-brand">
             <span className="h-px w-3 bg-brand" aria-hidden="true" />
             ACADEMY

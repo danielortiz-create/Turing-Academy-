@@ -1,7 +1,8 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { AiBadge } from "@/components/AiBadge";
 import { BuyButton } from "@/components/BuyButton";
-import { canAccessCourse, formatPrice } from "@/lib/access";
+import { canAccessCourse, courseInitials, formatPrice } from "@/lib/access";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
@@ -36,6 +37,7 @@ export default async function CoursePage({
     0
   );
   const firstLesson = course.modules[0]?.lessons[0];
+  const isSlideCourse = course.modules.some((m) => m.lessons.some((l) => l.videoProvider === "SLIDES"));
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-12">
@@ -57,11 +59,12 @@ export default async function CoursePage({
 
       <div className="grid gap-10 lg:grid-cols-[1fr_360px]">
         <div>
+          {course.aiGenerated && <AiBadge className="mb-3" />}
           <h1 className="text-3xl font-bold sm:text-4xl">{course.title}</h1>
           {course.subtitle && <p className="mt-3 text-lg text-neutral-600">{course.subtitle}</p>}
           <p className="mt-2 text-sm text-neutral-500">
             {course.modules.length} módulos · {lessonCount} lecciones
-            {totalMin > 0 && ` · ${Math.round(totalMin / 60)} h ${totalMin % 60} min de video`}
+            {totalMin > 0 && ` · ${Math.floor(totalMin / 60)} h ${totalMin % 60} min de ${isSlideCourse ? "contenido" : "video"}`}
           </p>
 
           <div className="prose mt-6 max-w-none text-neutral-700">
@@ -124,7 +127,7 @@ export default async function CoursePage({
         <aside>
           <div className="card sticky top-24 p-6">
             <div className="flex aspect-video items-center justify-center rounded-lg bg-ink text-5xl font-bold text-brand-light">
-              P6
+              {courseInitials(course.title)}
             </div>
             <p className="mt-5 text-center text-3xl font-bold">
               {formatPrice(course.priceCents)}
@@ -141,6 +144,10 @@ export default async function CoursePage({
                 ) : (
                   <p className="text-center text-neutral-500">El contenido llegará pronto</p>
                 )
+              ) : course.priceCents === 0 ? (
+                <Link href="/registro" className="btn-primary w-full text-lg">
+                  Crear cuenta gratis y empezar
+                </Link>
               ) : (
                 <BuyButton
                   courseId={course.id}
@@ -151,7 +158,11 @@ export default async function CoursePage({
             </div>
             <ul className="mt-6 space-y-2 text-sm text-neutral-600">
               <li>✓ Acceso de por vida</li>
-              <li>✓ Videos en alta calidad</li>
+              {isSlideCourse ? (
+                <li>✓ Tutor IA que responde tus dudas</li>
+              ) : (
+                <li>✓ Videos en alta calidad</li>
+              )}
               <li>✓ Aprende a tu ritmo</li>
               <li>✓ Seguimiento de tu progreso</li>
             </ul>

@@ -1,6 +1,7 @@
 import Link from "next/link";
+import { AiBadge } from "@/components/AiBadge";
 import { prisma } from "@/lib/prisma";
-import { formatPrice } from "@/lib/access";
+import { courseInitials, formatPrice } from "@/lib/access";
 
 export const dynamic = "force-dynamic";
 
@@ -67,7 +68,7 @@ export default async function HomePage() {
             </div>
 
             {/* Estadísticas */}
-            <dl className="mt-12 grid grid-cols-3 gap-4 divide-x divide-neutral-200">
+            <dl className="mt-12 grid gap-4 sm:grid-cols-3 sm:divide-x sm:divide-neutral-200">
               {[
                 {
                   title: "+1,000",
@@ -94,7 +95,7 @@ export default async function HomePage() {
                   ),
                 },
               ].map((s, i) => (
-                <div key={s.title} className={`flex items-center gap-3 ${i > 0 ? "pl-4" : ""}`}>
+                <div key={s.title} className={`flex items-center gap-3 ${i > 0 ? "sm:pl-4" : ""}`}>
                   <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-brand/15 bg-brand/5">
                     <svg
                       viewBox="0 0 24 24"
@@ -284,12 +285,13 @@ export default async function HomePage() {
                     className="card group overflow-hidden transition hover:shadow-md"
                   >
                     <div className="flex aspect-video items-center justify-center bg-ink text-5xl font-bold text-brand-light">
-                      P6
+                      {courseInitials(course.title)}
                     </div>
                     <div className="p-5">
                       <h3 className="text-lg font-semibold group-hover:text-brand">
                         {course.title}
                       </h3>
+                  {course.aiGenerated && <AiBadge className="mt-2" />}
                       <p className="mt-1 line-clamp-2 text-sm text-neutral-600">
                         {course.subtitle}
                       </p>

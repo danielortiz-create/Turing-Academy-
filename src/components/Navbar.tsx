@@ -11,7 +11,7 @@ export function Navbar() {
     <header className="sticky top-0 z-40 h-16 border-b border-neutral-200 bg-white/90 backdrop-blur">
       <div className="mx-auto flex h-full max-w-6xl items-center justify-between px-4">
         <Logo />
-        <nav className="flex items-center gap-3 sm:gap-5">
+        <nav className="flex items-center gap-2 sm:gap-5">
           <Link href="/cursos" className="text-sm font-medium hover:text-brand">
             Cursos
           </Link>
@@ -34,18 +34,19 @@ export function Navbar() {
               </span>
               <button
                 onClick={() => signOut({ callbackUrl: "/" })}
-                className="btn-secondary !px-3 !py-1.5 text-sm"
+                className="btn-secondary !px-2.5 !py-1.5 text-sm sm:!px-3"
               >
                 Salir
               </button>
             </div>
           ) : (
             <div className="flex items-center gap-2">
-              <Link href="/login" className="btn-secondary !px-3 !py-1.5 text-sm">
+              <Link href="/login" className="btn-secondary !px-2.5 !py-1.5 text-sm sm:!px-3">
                 Entrar
               </Link>
-              <Link href="/registro" className="btn-primary !px-3 !py-1.5 text-sm">
-                Crear cuenta
+              <Link href="/registro" className="btn-primary whitespace-nowrap !px-2.5 !py-1.5 text-sm sm:!px-3">
+                <span className="sm:hidden">Registro</span>
+                <span className="hidden sm:inline">Crear cuenta</span>
               </Link>
             </div>
           )}

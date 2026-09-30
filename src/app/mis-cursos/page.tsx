@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
+import { courseInitials } from "@/lib/access";
 import { prisma } from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
@@ -11,19 +12,31 @@ export default async function MyCoursesPage() {
   const session = await auth();
   if (!session?.user) redirect("/login?callbackUrl=/mis-cursos");
 
-  const purchases = await prisma.purchase.findMany({
-    where: { userId: session.user.id, status: "PAID" },
-    include: {
-      course: {
-        include: {
-          modules: {
-            orderBy: { order: "asc" },
-            include: { lessons: { orderBy: { order: "asc" }, select: { id: true } } },
-          },
-        },
-      },
+  const courseInclude = {
+    modules: {
+      orderBy: { order: "asc" as const },
+      include: { lessons: { orderBy: { order: "asc" as const }, select: { id: true } } },
     },
+  };
+  const paid = await prisma.purchase.findMany({
+    where: { userId: session.user.id, status: "PAID" },
+    include: { course: { include: courseInclude } },
   });
+  // Cursos gratis en los que el alumno ya avanzó al menos una lección
+  const startedFree = await prisma.course.findMany({
+    where: {
+      published: true,
+      priceCents: 0,
+      modules: { some: { lessons: { some: { progress: { some: { userId: session.user.id } } } } } },
+    },
+    include: courseInclude,
+  });
+  const purchases = [
+    ...paid,
+    ...startedFree
+      .filter((c) => !paid.some((p) => p.courseId === c.id))
+      .map((course) => ({ course })),
+  ];
 
   const progress = await prisma.progress.findMany({
     where: { userId: session.user.id, completed: true },
@@ -54,7 +67,7 @@ export default async function MyCoursesPage() {
             return (
               <div key={course.id} className="card overflow-hidden">
                 <div className="flex aspect-video items-center justify-center bg-ink text-5xl font-bold text-brand-light">
-                  P6
+                  {courseInitials(course.title)}
                 </div>
                 <div className="p-5">
                   <h3 className="font-semibold">{course.title}</h3>

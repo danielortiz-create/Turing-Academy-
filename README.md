@@ -1,12 +1,14 @@
 # Turing Academy
 
 Plataforma de cursos en línea de ingeniería (primer curso: **Oracle Primavera P6**).
-Construida con Next.js (cliente + servidor), PostgreSQL + Prisma, NextAuth y Stripe.
+Construida con Next.js (cliente + servidor), Prisma (SQLite en desarrollo), NextAuth, Stripe y la API de Claude.
 
 ## Funcionalidades
 
 - 🎓 Catálogo de cursos con módulos y lecciones en video
 - 🔐 Inicio de sesión con **correo/contraseña o Google (Gmail)**
+- 🧑‍🏫 Cursos en **diapositivas con tutor IA** (Claude): el alumno pregunta sobre la slide actual
+  o pide que se la expliquen de otra forma, y luego sigue con la lección
 - 🎬 Videos protegidos: la URL solo se entrega a usuarios que compraron el curso
   (compatible con YouTube, Vimeo o archivos MP4 alojados en el servidor)
 - 💳 Pagos con **Stripe Checkout**
@@ -52,6 +54,21 @@ administrador automáticamente.
    `https://tu-dominio.com/api/webhooks/stripe` con el evento `checkout.session.completed`
 3. Copia el secreto del webhook a `STRIPE_WEBHOOK_SECRET`
 4. En desarrollo puedes usar `stripe listen --forward-to localhost:3000/api/webhooks/stripe`
+
+### Tutor IA (Claude API)
+
+El curso "Introducción a la gestión de proyectos" usa diapositivas con un tutor IA.
+
+1. Crea una clave en https://console.anthropic.com/settings/keys
+2. Crea un archivo `.env` en la carpeta del proyecto (si no existe) con la línea:
+   `ANTHROPIC_API_KEY="sk-ant-..."`
+3. Reinicia `npm run dev`
+
+- Cada alumno tiene **20 preguntas por día** (constante `DAILY_LIMIT` en `src/lib/tutor.ts`).
+  Pedir "explícalo de otra forma" también cuenta como pregunta.
+- Modelo: `claude-opus-5-5` con esfuerzo bajo, para respuestas breves (`TUTOR_MODEL` en `src/lib/tutor.ts`).
+- El contenido de las diapositivas está en `prisma/courses/gestion-proyectos.js`. Para cambiarlo,
+  edita ese archivo y ejecuta `npm run db:seed` (el progreso de los alumnos se conserva).
 
 ### Videos
 
